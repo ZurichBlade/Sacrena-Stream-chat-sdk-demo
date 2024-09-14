@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Sacrena</string>
+    <string name="str_connections">Connections</string>
+    <string name="stream_compose_this_is_beginning_of_your_br_conversation_with_s">This is beginning of your \n conversation with %s.</string>
+    <string name="str_message">Message</string>
+    <string name="sacrena">Sacrena</string>
+    <string name="custom_user">Custom User</string>
+    <string name="login_user">Login User</string>
+</resources>
