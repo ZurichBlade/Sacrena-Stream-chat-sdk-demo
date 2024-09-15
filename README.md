@@ -4,7 +4,7 @@
 This demo app showcases the integration of the Stream Chat SDK with a custom UI built using Jetpack Compose and Kotlin. It follows Material Design principles and is structured using the MVVM architecture with Dagger Hilt for dependency injection.
 
 ## Screenshots
-![Screenshot 1](https://github.com/ZurichBlade/Auto-Scroll/blob/main/AutoScrollSS.png?raw=true)
+![Screenshot 1](https://github.com/ZurichBlade/Sacrena-Stream-chat-sdk-demo/blob/main/Frame_ss.png?raw=true)
 
 ## Features
 - Jetpack Compose and Kotlin
@@ -15,7 +15,7 @@ This demo app showcases the integration of the Stream Chat SDK with a custom UI 
 - Dagger Hilt
 
 ## Download
-- [APK Link](https://developer.android.com/reference/android/accessibilityservice/AccessibilityService) 
+- [APK Link](https://drive.google.com/file/d/1n_9Tb3wkpmuFz3mn3hISXLffaYN7MxPc/view?usp=drivesdk) 
 
 
 
