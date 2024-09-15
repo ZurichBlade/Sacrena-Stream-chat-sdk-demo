@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,10 +28,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,7 +37,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.lifecycleScope
 import com.example.sacrenabymehuljadhav.ChatHelper
 import com.example.sacrenabymehuljadhav.R
 import com.example.sacrenabymehuljadhav.activity.ChannelsActivity
@@ -50,13 +46,14 @@ import com.example.sacrenabymehuljadhav.ui.theme.myBackgroundColor
 import com.example.sacrenabymehuljadhav.ui.theme.myDivider
 import com.example.sacrenabymehuljadhav.ui.theme.myForegroundColor
 import com.example.sacrenabymehuljadhav.ui.theme.primaryDark
+import com.example.sacrenabymehuljadhav.viewmodel.CustomLoginViewModel
 import io.getstream.chat.android.compose.ui.theme.ChatTheme
-import io.getstream.chat.android.models.User
 import io.getstream.result.Error
-import kotlinx.coroutines.launch
 
 
 class CustomLoginActivity : ComponentActivity() {
+
+    private val customLoginViewModel: CustomLoginViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,17 +65,13 @@ class CustomLoginActivity : ComponentActivity() {
         setContent {
             ChatTheme(allowUIAutomationTest = true) {
                 CustomLoginScreen(
+                    viewModel = customLoginViewModel,
                     onBackButtonClick = ::finish,
-                    onLoginButtonClick = { userCredentials ->
-                        ChatHelper.initializeSdk(applicationContext, userCredentials.apiKey)
-
-                        lifecycleScope.launch {
-                            ChatHelper.connectUser(
-                                userCredentials = userCredentials,
-                                onSuccess = ::openChannels,
-                                onError = ::showError,
-                            )
-                        }
+                    onLoginButtonClick = {
+                        customLoginViewModel.onLoginButtonClick(
+                            onSuccess = ::openChannels,
+                            onError = ::showError
+                        )
                     },
                 )
             }
@@ -87,8 +80,9 @@ class CustomLoginActivity : ComponentActivity() {
 
     @Composable
     fun CustomLoginScreen(
+        viewModel: CustomLoginViewModel,
         onBackButtonClick: () -> Unit,
-        onLoginButtonClick: (UserCredentials) -> Unit,
+        onLoginButtonClick: () -> Unit,
     ) {
         Scaffold(
             topBar = { CustomLoginToolbar(onClick = onBackButtonClick) },
@@ -102,54 +96,36 @@ class CustomLoginActivity : ComponentActivity() {
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    var apiKeyText by remember { mutableStateOf("") }
-                    var userIdText by remember { mutableStateOf("") }
-                    var userTokenText by remember { mutableStateOf("") }
-                    var userNameText by remember { mutableStateOf("") }
-
-                    val isLoginButtonEnabled =
-                        apiKeyText.isNotEmpty() && userIdText.isNotEmpty() && userTokenText.isNotEmpty()
 
                     CustomLoginInputField(
                         hint = "Chat API Key",
-                        value = apiKeyText,
-                        onValueChange = { apiKeyText = it },
+                        value = viewModel.apiKey,
+                        onValueChange = { viewModel.apiKey = it },
                     )
 
                     CustomLoginInputField(
                         hint = "User ID",
-                        value = userIdText,
-                        onValueChange = { userIdText = it },
+                        value = viewModel.userId,
+                        onValueChange = { viewModel.userId = it },
                     )
 
                     CustomLoginInputField(
                         hint = "User Token",
-                        value = userTokenText,
-                        onValueChange = { userTokenText = it },
+                        value = viewModel.userToken,
+                        onValueChange = { viewModel.userToken = it },
                     )
 
                     CustomLoginInputField(
                         hint = "Username(optional)",
-                        value = userNameText,
-                        onValueChange = { userNameText = it },
+                        value = viewModel.userName,
+                        onValueChange = { viewModel.userName = it },
                     )
 
                     Spacer(modifier = Modifier.weight(1f))
 
                     CustomLoginButton(
-                        enabled = isLoginButtonEnabled,
-                        onClick = {
-                            onLoginButtonClick(
-                                UserCredentials(
-                                    apiKey = apiKeyText,
-                                    user = User(
-                                        id = userIdText,
-                                        name = userNameText,
-                                    ),
-                                    token = userTokenText,
-                                ),
-                            )
-                        },
+                        enabled = viewModel.isLoginButtonEnabled,
+                        onClick = onLoginButtonClick,
                     )
                     Spacer(modifier = Modifier.height(50.dp))
                 }
@@ -187,7 +163,6 @@ class CustomLoginActivity : ComponentActivity() {
             )
     }
 
-    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun CustomLoginInputField(
         hint: String,
@@ -247,7 +222,7 @@ class CustomLoginActivity : ComponentActivity() {
         finish()
     }
 
-    private fun showError(error: Error) {
+    private fun showError(error: ChatHelper.AppError) {
         Toast.makeText(this, "Login failed ${error.message}", Toast.LENGTH_SHORT).show()
     }
 

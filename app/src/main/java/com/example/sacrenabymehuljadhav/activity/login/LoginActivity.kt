@@ -44,6 +44,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.sacrenabymehuljadhav.ChatHelper
 import com.example.sacrenabymehuljadhav.R
@@ -53,6 +54,7 @@ import com.example.sacrenabymehuljadhav.data.UserCredentials
 import com.example.sacrenabymehuljadhav.ui.theme.Typography
 import com.example.sacrenabymehuljadhav.ui.theme.myBackgroundColor
 import com.example.sacrenabymehuljadhav.ui.theme.primaryDark
+import com.example.sacrenabymehuljadhav.viewmodel.LoginViewModel
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.compose.ui.components.avatar.ImageAvatar
 import io.getstream.chat.android.compose.ui.components.avatar.UserAvatar
@@ -60,11 +62,16 @@ import io.getstream.chat.android.compose.ui.theme.ChatTheme
 import kotlinx.coroutines.launch
 
 
-class UserLoginActivity : ComponentActivity() {
+class LoginActivity : ComponentActivity() {
+
+    private lateinit var viewModel: LoginViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        viewModel = ViewModelProvider(this)[LoginViewModel::class.java]
+
+        // setting up full screen theme
         window?.let { window ->
             window.statusBarColor = ContextCompat.getColor(this, R.color.background)
         }
@@ -73,19 +80,17 @@ class UserLoginActivity : ComponentActivity() {
             ChatTheme(allowUIAutomationTest = true) {
                 UserLoginScreen(
                     onUserItemClick = { userCredentials ->
-                        lifecycleScope.launch {
-                            if (ChatClient.instance().config.apiKey != userCredentials.apiKey) {
-                                // If the user attempted to login with custom credentials on the custom
-                                // login screen then we need to reinitialize the SDK with our API key.
-                                ChatHelper.initializeSdk(applicationContext, userCredentials.apiKey)
-                            }
-                            ChatHelper.connectUser(userCredentials = userCredentials)
-                            openChannels()
-                        }
+                        viewModel.onUserCredentialsClick(userCredentials)
                     },
-                    onCustomLoginClick = ::openCustomLogin,
+                    onCustomLoginClick = {
+                        viewModel.onCustomLoginClick()
+                    },
                 )
             }
+        }
+
+        viewModel.navigationEvent.observe(this) { event ->
+            handleNavigationEvent(event)
         }
     }
 
@@ -152,15 +157,14 @@ class UserLoginActivity : ComponentActivity() {
     @Composable
     fun ClickableText() {
 
-        val clickableText = "Mehul Jadhav"
-        val url = "https://zurichblade.github.io/my-portfolio/"
+        val clickableText = stringResource(R.string.mehul_jadhav)
+        val url = stringResource(R.string.https_zurichblade_github_io_my_portfolio)
 
         // Create an AnnotatedString
         val annotatedString = buildAnnotatedString {
             withStyle(
                 style = SpanStyle(
-                    fontSize = 14.sp,
-                    color = ChatTheme.colors.textLowEmphasis
+                    fontSize = 14.sp, color = ChatTheme.colors.textLowEmphasis
                 )
             ) {
                 append("Developed by ")
@@ -179,12 +183,9 @@ class UserLoginActivity : ComponentActivity() {
         val context = LocalContext.current
 
         ClickableText(
-            text = annotatedString,
-            onClick = { offset ->
+            text = annotatedString, onClick = { offset ->
                 val annotations = annotatedString.getStringAnnotations(
-                    tag = "clickable",
-                    start = offset,
-                    end = offset
+                    tag = "clickable", start = offset, end = offset
                 )
                 if (annotations.isNotEmpty()) {
                     val url = annotations.first().item
@@ -193,11 +194,8 @@ class UserLoginActivity : ComponentActivity() {
                     }
                     context.startActivity(intent)
                 }
-            },
-            modifier = Modifier.padding(16.dp),
-            style = Typography.bodyMedium.copy(
-                color = ChatTheme.colors.textLowEmphasis,
-                fontSize = 14.sp
+            }, modifier = Modifier.padding(16.dp), style = Typography.bodyMedium.copy(
+                color = ChatTheme.colors.textLowEmphasis, fontSize = 14.sp
             )
         )
     }
@@ -279,7 +277,7 @@ class UserLoginActivity : ComponentActivity() {
                 )
 
                 Text(
-                    text = "Custom User",
+                    text = stringResource(R.string.custom_user),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black,
@@ -298,28 +296,22 @@ class UserLoginActivity : ComponentActivity() {
         }
     }
 
-    @Composable
-    private fun DividerItem() {
-        Spacer(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(0.5.dp)
-                .background(color = ChatTheme.colors.borders),
-        )
-    }
+    private fun handleNavigationEvent(event: LoginViewModel.NavigationEvent) {
+        when (event) {
+            is LoginViewModel.NavigationEvent.OpenChannels -> {
+                startActivity(ChannelsActivity.createIntent(this))
+                finish()
+            }
 
-    private fun openChannels() {
-        startActivity(ChannelsActivity.createIntent(this))
-        finish()
-    }
-
-    private fun openCustomLogin() {
-        startActivity(CustomLoginActivity.createIntent(this))
+            is LoginViewModel.NavigationEvent.OpenCustomLogin -> {
+                startActivity(CustomLoginActivity.createIntent(this))
+            }
+        }
     }
 
     companion object {
         fun createIntent(context: Context): Intent {
-            return Intent(context, UserLoginActivity::class.java).apply {
+            return Intent(context, LoginActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             }
         }

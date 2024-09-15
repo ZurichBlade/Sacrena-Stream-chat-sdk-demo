@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <application
-        android:name="com.example.sacrenabymehuljadhav.ChatApp"
+        android:name="com.example.sacrenabymehuljadhav.BaseClass"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -13,16 +13,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SacrenaByMehulJadhav"
         tools:targetApi="31">
-        <activity
-            android:name=".MainActivity"
-            android:exported="true"
-            android:theme="@style/Theme.SacrenaByMehulJadhav">
-            <!--            <intent-filter>-->
-            <!--                <action android:name="android.intent.action.MAIN" />-->
-
-            <!--                <category android:name="android.intent.category.LAUNCHER" />-->
-            <!--            </intent-filter>-->
-        </activity>
         <activity
             android:name=".activity.StartupActivity"
             android:exported="true"
@@ -35,22 +25,20 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.login.UserLoginActivity"
-            android:theme="@style/Theme.SacrenaByMehulJadhav"
-            android:exported="false" />
+            android:name=".activity.login.LoginActivity"
+            android:exported="false"
+            android:theme="@style/Theme.SacrenaByMehulJadhav" />
         <activity
             android:name=".activity.login.CustomLoginActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".activity.ChannelsActivity"
-            android:exported="false"
-            />
+            android:exported="false" />
         <activity
             android:name=".activity.MessagesActivity"
             android:exported="false"
-            android:windowSoftInputMode="adjustResize"
-            />
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>

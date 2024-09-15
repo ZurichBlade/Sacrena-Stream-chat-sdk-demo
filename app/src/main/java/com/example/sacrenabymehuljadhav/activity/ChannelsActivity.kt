@@ -8,11 +8,12 @@ import androidx.activity.viewModels
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewModelScope
-import com.example.sacrenabymehuljadhav.ChatApp
+import com.example.sacrenabymehuljadhav.BaseClass
 import com.example.sacrenabymehuljadhav.ChatHelper
 import com.example.sacrenabymehuljadhav.R
-import com.example.sacrenabymehuljadhav.activity.login.UserLoginActivity
+import com.example.sacrenabymehuljadhav.activity.login.LoginActivity
 import com.example.sacrenabymehuljadhav.streamcustomviews.channel.ChannelsScreen
+import dagger.hilt.android.AndroidEntryPoint
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.compose.ui.theme.ChatTheme
 import io.getstream.chat.android.compose.viewmodel.channels.ChannelListViewModel
@@ -21,8 +22,12 @@ import io.getstream.chat.android.models.Channel
 import io.getstream.chat.android.models.Message
 import io.getstream.chat.android.models.querysort.QuerySortByField
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ChannelsActivity : BaseConnectedActivity() {
+@AndroidEntryPoint
+class ChannelsActivity @Inject constructor(
+    private val chatHelper: ChatHelper
+) : BaseConnectedActivity() {
 
     private val factory by lazy {
         ChannelViewModelFactory(
@@ -44,8 +49,8 @@ class ChannelsActivity : BaseConnectedActivity() {
 
         setContent {
             ChatTheme(
-                dateFormatter = ChatApp.dateFormatter,
-                autoTranslationEnabled = ChatApp.autoTranslationEnabled,
+                dateFormatter = BaseClass.dateFormatter,
+                autoTranslationEnabled = BaseClass.autoTranslationEnabled,
                 allowUIAutomationTest = true,
             ) {
                 ChannelsScreen(
@@ -57,7 +62,7 @@ class ChannelsActivity : BaseConnectedActivity() {
                     onBackPressed = ::finish,
                     onHeaderActionClick = {
                         listViewModel.viewModelScope.launch {
-                            ChatHelper.disconnectUser()
+                            chatHelper.disconnectUser()
                             openUserLogin()
                         }
                     },
@@ -91,7 +96,7 @@ class ChannelsActivity : BaseConnectedActivity() {
 
     private fun openUserLogin() {
         finish()
-        startActivity(UserLoginActivity.createIntent(this))
+        startActivity(LoginActivity.createIntent(this))
         overridePendingTransition(0, 0)
     }
 

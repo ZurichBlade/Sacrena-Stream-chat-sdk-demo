@@ -1,72 +1,61 @@
 package com.example.sacrenabymehuljadhav.activity
 
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.core.app.TaskStackBuilder
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.example.sacrenabymehuljadhav.ChatApp
+import com.example.sacrenabymehuljadhav.BaseClass
 import com.example.sacrenabymehuljadhav.ChatHelper
-import com.example.sacrenabymehuljadhav.activity.login.UserLoginActivity
+import com.example.sacrenabymehuljadhav.activity.login.LoginActivity
+import com.example.sacrenabymehuljadhav.viewmodel.StartupViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class StartupActivity : ComponentActivity() {
+
+    private lateinit var viewModel: StartupViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        lifecycleScope.launch {
-            val userCredentials = ChatApp.credentialsRepository.loadUserCredentials()
-            if (userCredentials != null) {
-                // Ensure that the user is connected
-                ChatHelper.connectUser(userCredentials)
+        viewModel = ViewModelProvider(this)[StartupViewModel::class.java]
 
-                if (intent.hasExtra(KEY_CHANNEL_ID)) {
-                    // Navigating from push, route to the messages screen
-                    val channelId = requireNotNull(intent.getStringExtra(KEY_CHANNEL_ID))
-                    val messageId = intent.getStringExtra(KEY_MESSAGE_ID)
-                    val parentMessageId = intent.getStringExtra(KEY_PARENT_MESSAGE_ID)
+        // Observe the navigation events
+        viewModel.navigationEvent.observe(this) { event ->
+            handleNavigationEvent(event)
+        }
 
-                    TaskStackBuilder.create(this@StartupActivity)
-                        .addNextIntent(ChannelsActivity.createIntent(this@StartupActivity))
-                        .addNextIntent(
-                            MessagesActivity.createIntent(
-                                context = this@StartupActivity,
-                                channelId = channelId,
-                                messageId = messageId,
-                                parentMessageId = parentMessageId,
-                            ),
+        viewModel.checkUserCredentials(intent)
+
+    }
+
+    private fun handleNavigationEvent(event: StartupViewModel.NavigationEvent) {
+        when (event) {
+            is StartupViewModel.NavigationEvent.ToChannelsScreen -> {
+                startActivity(ChannelsActivity.createIntent(this))
+            }
+
+            is StartupViewModel.NavigationEvent.ToLoginScreen -> {
+                startActivity(LoginActivity.createIntent(this))
+            }
+
+            is StartupViewModel.NavigationEvent.ToMessagesScreen -> {
+                TaskStackBuilder.create(this)
+                    .addNextIntent(ChannelsActivity.createIntent(this))
+                    .addNextIntent(
+                        MessagesActivity.createIntent(
+                            context = this,
+                            channelId = event.channelId,
+                            messageId = event.messageId,
+                            parentMessageId = event.parentMessageId
                         )
-                        .startActivities()
-                } else {
-                    // Logged in, navigate to the channels screen
-                    startActivity(ChannelsActivity.createIntent(this@StartupActivity))
-                }
-            } else {
-                // Not logged in, start with the login screen
-                startActivity(UserLoginActivity.createIntent(this@StartupActivity))
-            }
-            finish()
-        }
-    }
-
-    companion object {
-        private const val KEY_CHANNEL_ID = "channelId"
-        private const val KEY_MESSAGE_ID = "messageId"
-        private const val KEY_PARENT_MESSAGE_ID = "parentMessageId"
-
-        fun createIntent(
-            context: Context,
-            channelId: String,
-            messageId: String?,
-            parentMessageId: String?,
-        ): Intent {
-            return Intent(context, StartupActivity::class.java).apply {
-                putExtra(KEY_CHANNEL_ID, channelId)
-                putExtra(KEY_MESSAGE_ID, messageId)
-                putExtra(KEY_PARENT_MESSAGE_ID, parentMessageId)
+                    )
+                    .startActivities()
             }
         }
+        finish()
     }
+
 }

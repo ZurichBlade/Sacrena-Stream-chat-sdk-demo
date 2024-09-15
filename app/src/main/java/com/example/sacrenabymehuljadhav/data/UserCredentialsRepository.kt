@@ -13,9 +13,6 @@ class UserCredentialsRepository(context: Context) {
         context.getSharedPreferences(PREFS_USER_CREDENTIALS, Context.MODE_PRIVATE)
     }
 
-    /**
-     * Loads credentials for the logged-in user from persistent storage.
-     */
     fun loadUserCredentials(): UserCredentials? {
         val apiKey = prefs.getString(KEY_API_KEY, null) ?: return null
         val userId = prefs.getString(KEY_USER_ID, null) ?: return null
@@ -34,16 +31,12 @@ class UserCredentialsRepository(context: Context) {
         )
     }
 
-    /**
-     * Loads an API key for the environment the user was logged into.
-     */
+
     fun loadApiKey(): String? {
         return prefs.getString(KEY_API_KEY, null)
     }
 
-    /**
-     * Saves credentials for the logged-in user.
-     */
+
     fun saveUserCredentials(userCredentials: UserCredentials) {
         prefs.edit()
             .putString(KEY_API_KEY, userCredentials.apiKey)
@@ -54,9 +47,7 @@ class UserCredentialsRepository(context: Context) {
             .apply()
     }
 
-    /**
-     * Removes user credentials from the persistent storage.
-     */
+
     fun clearCredentials() {
         prefs.edit()
             .clear()

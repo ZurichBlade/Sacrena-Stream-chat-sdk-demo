@@ -1,8 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
-    id("kotlin-kapt")
-    id("com.google.dagger.hilt.android")
+//    id("kotlin-kapt")
+    id("dagger.hilt.android.plugin")
 
 }
 
@@ -51,9 +51,9 @@ android {
         }
     }
     // Allow references to generated code
-    kapt {
-        correctErrorTypes = true
-    }
+//    kapt {
+//        correctErrorTypes = true
+//    }
 
 }
 
@@ -67,10 +67,11 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation (libs.material)
-    implementation (libs.androidx.material)
+    implementation(libs.material)
+    implementation(libs.androidx.material)
     implementation(libs.androidx.ui.text.google.fonts)
     implementation(libs.androidx.appcompat)
+//    implementation(libs.core.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -78,13 +79,21 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    implementation(libs.androidx.ui.text.google.fonts.v170)  // added variable fonts
-    implementation(libs.androidx.lifecycle.viewmodel.compose) //viewmodel compose
-    implementation(libs.stream.chat.android.compose) // stream sdk
+
+    //viewmodel compose and live data
+    implementation(libs.androidx.ui.text.google.fonts.v170)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.livedata.ktx)
+
+    // stream sdk
+    implementation(libs.stream.chat.android.compose)
     implementation(libs.stream.chat.android.offline)
-    implementation (libs.stream.chat.android.compose.v540)
+    implementation(libs.stream.chat.android.compose.v540)
     implementation(libs.androidx.material.icons.extended)
-    implementation(libs.hilt.android)  //hilt
-    kapt(libs.hilt.android.compiler.v2511)
+
+    // dragged hilt
+    implementation(libs.hilt.android)
+//    kapt(libs.hilt.android.compiler)
+    annotationProcessor("com.google.dagger:hilt-compiler:2.38.1")
 
 }
