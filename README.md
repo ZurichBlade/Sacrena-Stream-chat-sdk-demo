@@ -6,16 +6,13 @@ This demo app showcases the integration of the Stream Chat SDK with a custom UI 
 ## Screenshots
 ![Screenshot 1](https://github.com/ZurichBlade/Sacrena-Stream-chat-sdk-demo/blob/main/Frame_ss.png?raw=true)
 
-## Features
+## Tech Stack 
 - Jetpack Compose and Kotlin
 - AndroidX and Jetpack libraries  
 - Material Design
 - MVVM architecture 
 - Stream chat SDK
 - Dagger Hilt
-
-## Download
-- [APK Link](https://drive.google.com/file/d/1n_9Tb3wkpmuFz3mn3hISXLffaYN7MxPc/view?usp=drivesdk) 
 
 
 
